@@ -1,41 +1,107 @@
 # Movie Review Aggregator
 
-A multi-source data pipeline that combines New York Times movie reviews with TMDB film metadata — demonstrating production-grade API integration, pagination handling, and data normalization in Python.
+A multi-source data pipeline merging New York Times critical reviews with TMDB film metadata — demonstrating production-grade API integration, pagination handling, and data normalization in Python.
+
+---
 
 ## Overview
 
-This pipeline retrieves critical reviews from the NYT Movies API, enriches each title with cast, genre, and rating data from The Movie Database (TMDB), merges both sources into a clean unified dataset, and exports to CSV for downstream analysis.
+This project builds an automated pipeline that retrieves NYT movie reviews via their API, enriches each title with supplementary metadata from The Movie Database (TMDB), and outputs a clean, unified CSV dataset. The pipeline handles pagination, API rate limiting, missing data, and credential management — addressing the full set of production concerns for a real-world data integration task.
 
-## Pipeline Steps
+---
 
-1. **NYT API**: Query movie reviews by topic and date range (Jan 2013 - May 2023) with full pagination support
-2. **TMDB API**: For each reviewed title, retrieve metadata (genres, runtime, vote average, cast)
-3. **Merge & clean**: Join on title, normalize column types, drop duplicates and nulls
-4. **Export**: Save to structured CSV for analysis or visualization
+## Pipeline Architecture
 
-## Features
+```
+NYT Movies API
+    │
+    ├── Paginated review retrieval (Jan 2013 – May 2023)
+    │
+    └── Per-title title string extraction
+              │
+         TMDB API enrichment
+              │
+         ├── genres
+         ├── runtime
+         ├── vote_average
+         └── cast info
+              │
+         Data merge & cleaning
+              │
+         ├── Title-based joins
+         ├── Null / duplicate removal
+         └── Column normalization
+              │
+         CSV export → output/
+```
 
-- Handles API rate limiting with configurable retry logic
-- Environment variable-based credential management (.env)
-- Modular functions for each pipeline stage — easy to extend with new sources
-- Graceful error handling for titles not found in TMDB
+---
 
-## Stack
+## Coverage
 
-Python | requests | pandas | python-dotenv | NYT API | TMDB API
+- **Date range:** January 2013 – May 2023 (10+ years of NYT critical reviews)
+- **Enrichment source:** TMDB metadata for all matched titles
 
-## Setup
-
-Run: pip install -r requirements.txt
-Copy .env.example to .env and add your NYT_API_KEY and TMDB_API_KEY
-Then: jupyter notebook retrieve_movie_data.ipynb
+---
 
 ## Output Schema
 
-| Column | Description |
-|--------|-------------|
-| title | Movie title |
-| nyt_review_summary | NYT critic summary |
-| genres | TMDB genre list |
-| vote_average | TMDB audience rating |
-| runtime | Film runtime (minutes) |
+| Column | Source | Description |
+|---|---|---|
+| title | NYT + TMDB | Movie name |
+| nyt_review_summary | NYT API | Critic assessment text |
+| genres | TMDB | Genre classification |
+| vote_average | TMDB | Audience rating |
+| runtime | TMDB | Film duration (minutes) |
+
+---
+
+## Engineering Features
+
+- **Pagination handling:** Full NYT review archive retrieved across multiple API pages
+- **Rate limit management:** Retry logic with back-off to avoid API throttling
+- **Credential security:** API keys managed via `.env` files (not hardcoded)
+- **Modular functions:** Each pipeline stage is independently callable and extensible
+- **Error handling:** Graceful fallback for titles not found in TMDB
+
+---
+
+## Tech Stack
+
+| Component | Tool |
+|---|---|
+| HTTP requests | requests |
+| Data manipulation | pandas |
+| Credential management | python-dotenv |
+| APIs | NYT Movies API, TMDB API |
+| Language | Python |
+
+---
+
+## Repository Structure
+
+```
+movie-review-aggregator/
+├── retrieve_movie_data_final.ipynb   # Full pipeline implementation
+├── output/                           # Exported CSV datasets
+└── README.md
+```
+
+---
+
+## Outcomes
+
+- Built a complete end-to-end data pipeline integrating two external APIs across 10+ years of review history
+- Implemented pagination, rate-limit retry logic, and secure credential handling — demonstrating production-ready API integration practices
+- Produced a clean, normalized dataset combining critical sentiment with audience ratings and film metadata
+- Modular architecture makes the pipeline straightforwardly extensible to additional data sources (Rotten Tomatoes, IMDb, etc.)
+
+---
+
+## Getting Started
+
+```bash
+pip install requests pandas python-dotenv
+# Add NYT_API_KEY and TMDB_API_KEY to a .env file
+jupyter notebook retrieve_movie_data_final.ipynb
+```
